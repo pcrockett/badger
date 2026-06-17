@@ -5,5 +5,65 @@ let BADGER_STATE_DIR = $"($XDG_STATE_HOME)/badger"
 
 def main [] {
   mkdir $BADGER_STATE_DIR
+}
+
+def "main publish" [
+  message: string
+  --level = "info"
+] {
+  (
+    {
+      message: $message
+      level: $level
+    }
+    | save-notification
+  )
+}
+
+def "main next" [] {
+  let next_file = try {
+    ls $BADGER_STATE_DIR | first
+  } catch {|err|
+    let err_metadata = $err.json? | default "{}" | from json
+    if ($err_metadata.code? == "nu::shell::io::not_found") {
+      null
+    } else {
+      error make $err
+    }
+  }
+  if ($next_file | is-empty) {
+    return
+  }
+
+  let message = $next_file.name | open | get message
+  rm $next_file.name
+  $message | print
+}
+
+def save-notification []: record -> string {
+  let payload = $in
+  let now = date now | date to-timezone UTC
+  mkdir $BADGER_STATE_DIR
+
+  mut index = 0
+  while (ls $BADGER_STATE_DIR | last).name? == $"($BADGER_STATE_DIR)/(get-slug $now $index).json" {
+    $index = $index + 1
+  }
+
+  let slug = get-slug $now $index
+  let file_path = $"($BADGER_STATE_DIR)/($slug).json"
+
+  # TODO: calculate index using try / catch to avoid race conditions
+  $payload | save $file_path
+  $file_path
+}
+
+def get-slug [time: datetime index: number]: nothing -> string {
+  let timestamp = $time | format date "%+"
+  let padded_index = $index | fill --character '0' --width 3 --alignment right
+  $"($timestamp)_($padded_index)"
+}
+
+def not-implemented [] {
   error make { msg: "not implemented yet" }
 }

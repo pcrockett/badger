@@ -10,6 +10,7 @@ setup() {
   cd "${TEST_CWD}"
   PATH="${TEST_HOME}/.local/bin:${PATH}"
   export HOME="${TEST_HOME}"
+  export XDG_STATE_HOME="${TEST_HOME}/.local/state"
 }
 
 teardown() {
