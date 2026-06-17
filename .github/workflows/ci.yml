@@ -35,10 +35,20 @@ jobs:
           tool: just@1.51.0,shfmt@3.13.1
 
       - name: Setup Bats
-        uses: bats-core/bats-action@77d6fb60505b4d0d1d73e48bd035b55074bbfb43  # 4.0.0
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          bats-version: 0.13.0
+        run: |
+          tmp_dir="$(mktemp --directory)"
+
+          # clone v1.13.0
+          git clone \
+            --revision 3bca150ec86275d6d9d5a4fd7d48ab8b6c6f3d87 \
+            --depth 1 \
+            https://github.com/bats-core/bats-core.git \
+            "${tmp_dir}"
+
+          cd "${tmp_dir}"
+          mkdir --parent ~/.local/share/bats
+          ./install.sh ~/.local/share/bats
+          ln --symbolic ~/.local/share/bats/bin/bats ~/.local/bin/bats
 
       - name: Setup Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
