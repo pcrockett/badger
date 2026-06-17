@@ -25,24 +25,26 @@ def "main publish" [
   }
 }
 
-def "main next" [] {
-  let next_file = try {
-    ls $BADGER_STATE_DIR | first
-  } catch {|err|
-    let err_metadata = $err.json? | default "{}" | from json
-    if ($err_metadata.code? == "nu::shell::io::not_found") {
-      null
-    } else {
-      error make $err
-    }
-  }
+def "main next" [
+  --peek(-p)    # don't take it out of the queue
+  --verbose(-v)
+] {
+  let next_file = next-notification-file
   if ($next_file | is-empty) {
     return
   }
 
-  let message = $next_file.name | open | get message
-  rm $next_file.name
-  $message | print
+  let payload = $next_file | open
+  let result = if $verbose {
+    $payload | upsert file $next_file | table
+  } else {
+    $payload.message
+  }
+
+  if not $peek {
+    rm $next_file
+  }
+  $result | print
 }
 
 def save-notification []: record -> string {
@@ -81,6 +83,19 @@ def save-notification []: record -> string {
   }
 
   $file_path
+}
+
+def next-notification-file []: nothing -> string {
+  try {
+    ls $BADGER_STATE_DIR | first | get --optional name
+  } catch {|err|
+    let err_metadata = $err.json? | default "{}" | from json
+    if ($err_metadata.code? == "nu::shell::io::not_found") {
+      null
+    } else {
+      error make $err
+    }
+  }
 }
 
 def get-slug [time: datetime index: number]: nothing -> string {

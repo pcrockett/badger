@@ -83,3 +83,26 @@ source tests/util.sh
   assert_no_stdout
   assert_exit_code 1
 }
+
+@test 'next - peek - leaves notification in queue' {
+  badger publish "this is a test"
+  capture_output badger next --peek
+  assert_no_stderr
+  assert_stdout "^this is a test$"
+  assert_exit_code 0
+
+  capture_output badger next
+  assert_no_stderr
+  assert_stdout "^this is a test$"
+  assert_exit_code 0
+}
+
+@test 'next - verbose - shows additional details' {
+  badger publish "this is a test"
+  capture_output badger next --verbose
+  assert_no_stderr
+  assert_stdout "message │ this is a test"
+  assert_stdout "level   │ info"
+  assert_stdout "file    │ /tmp/bats-home\..+\.json"
+  assert_exit_code 0
+}
