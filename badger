@@ -9,15 +9,20 @@ def main [] {
 
 def "main publish" [
   message: string
-  --level = "info"
+  --level(-l) = "info"
+  --verbose(-v)
 ] {
-  (
+  let file_path = (
     {
       message: $message
       level: $level
     }
     | save-notification
   )
+
+  if $verbose {
+    $"Saved to ($file_path)" | print
+  }
 }
 
 def "main next" [] {
@@ -42,24 +47,44 @@ def "main next" [] {
 
 def save-notification []: record -> string {
   let payload = $in
-  let now = date now | date to-timezone UTC
   mkdir $BADGER_STATE_DIR
+  let now = date now | date to-timezone UTC
 
   mut index = 0
-  while (ls $BADGER_STATE_DIR | last).name? == $"($BADGER_STATE_DIR)/(get-slug $now $index).json" {
+  mut file_path = ""
+  while true {
+    let slug = get-slug $now $index
+    $file_path = $"($BADGER_STATE_DIR)/($slug).json"
+
+    let save_success = try {
+      $payload | save $file_path
+      true
+    } catch {|err|
+      if ($err.msg == "Destination file already exists") {
+        false  # nonfatal error; increment index and try again
+      } else {
+        error make $err  # fatal error; we don't know what happened, abort
+      }
+    }
+
+    if $save_success {
+      break
+    }
+
+    if ($index >= 999) {
+      error make {
+        msg: "Exhausted unique message slugs"
+      }
+    }
+
     $index = $index + 1
   }
 
-  let slug = get-slug $now $index
-  let file_path = $"($BADGER_STATE_DIR)/($slug).json"
-
-  # TODO: calculate index using try / catch to avoid race conditions
-  $payload | save $file_path
   $file_path
 }
 
 def get-slug [time: datetime index: number]: nothing -> string {
-  let timestamp = $time | format date "%+"
+  let timestamp = $env.BADGER_TIMESTAMP? | default { ($time | format date "%+") }
   let padded_index = $index | fill --character '0' --width 3 --alignment right
   $"($timestamp)_($padded_index)"
 }
