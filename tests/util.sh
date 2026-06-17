@@ -6,7 +6,7 @@ setup() {
   TEST_HOME="$(mktemp --directory --tmpdir=/tmp bats-home.XXXXXX)"
   mkdir -p "${TEST_HOME}/.local/bin"
   cp badger "${TEST_HOME}/.local/bin"
-  cp .tool-versions "${TEST_CWD}"
+  test -f .tool-versions && cp .tool-versions "${TEST_CWD}"
   cd "${TEST_CWD}"
   PATH="${TEST_HOME}/.local/bin:${PATH}"
   export HOME="${TEST_HOME}"

@@ -7,6 +7,9 @@ on:
     branches: [main]
   pull_request:
     branches: ["**"]
+  schedule:
+    # because nushell is still not stable...
+    - cron: "17 3 * * 0"  # every Sunday at 03:17 UTC <https://crontab.guru/#17_3_*_*_0>
 
 permissions:
   contents: read
@@ -22,6 +25,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: hustcer/setup-nu@ccd5bb5426b05a32009c2ba967946231f3919c97  # v3.25
+        with:
+          check-latest: true  # intentionally not pinning while nushell is unstable
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
       - uses: taiki-e/install-action@b8cecb83565409bcc297b2df6e77f030b2a468d5  # v2.82.0
         with:
           tool: just@1.51.0,shfmt@3.13.1
@@ -30,6 +38,7 @@ jobs:
         uses: bats-core/bats-action@77d6fb60505b4d0d1d73e48bd035b55074bbfb43  # 4.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          bats-version: 0.13.0
 
       - name: Setup Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
