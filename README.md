@@ -1,0 +1,3 @@
+# badger
+
+dead simple notifications without a daemon, in your terminal

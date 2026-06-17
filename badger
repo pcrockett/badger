@@ -1,0 +1,9 @@
+#!/usr/bin/env nu
+
+let XDG_STATE_HOME = ($env.XDG_STATE_HOME? | default $"($env.HOME)/.local/state")
+let BADGER_STATE_DIR = $"($XDG_STATE_HOME)/badger"
+
+def main [] {
+  mkdir $BADGER_STATE_DIR
+  error make { msg: "not implemented yet" }
+}
