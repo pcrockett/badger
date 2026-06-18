@@ -63,6 +63,23 @@ def "main pending" [] {
   }
 }
 
+def "main run" [...args] {
+  let result = ^$args | tee { print } | complete
+  if $result.exit_code == 0 {
+    exit
+  }
+
+  (
+    main publish
+    $"Command `($args | str join ' ')` exited with code ($result.exit_code)"
+    --level error
+
+    # TODO: add $result to notification metadata
+  )
+
+  exit $result.exit_code
+}
+
 def save-notification []: record -> string {
   let payload = $in
   mkdir $BADGER_STATE_DIR

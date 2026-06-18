@@ -153,3 +153,24 @@ source tests/util.sh
   assert_no_stderr
   assert_exit_code 0
 }
+
+@test 'run - exit code 0 - does nothing' {
+  capture_output badger run echo hello
+  assert_stdout '^hello$'
+  assert_no_stderr
+  assert_exit_code 0
+  if badger pending; then
+    fail "there should be no pending notifications"
+  fi
+}
+
+@test 'run - exit code nonzero - publishes' {
+  capture_output badger run false
+  assert_no_stdout
+  assert_no_stderr
+  assert_exit_code 1
+  test "$(badger count)" -eq 1
+
+  # shellcheck disable=SC2016  # backticks don't execute in single-quote strings
+  test "$(badger next)" = 'Command `false` exited with code 1'
+}
