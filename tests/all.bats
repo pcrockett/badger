@@ -4,6 +4,13 @@
 
 source tests/util.sh
 
+@test 'main - always - displays help' {
+  capture_output badger
+  assert_no_stderr
+  assert_stdout 'Usage:'
+  assert_exit_code 0
+}
+
 @test 'main help - always - works' {
   capture_output badger --help
   assert_no_stderr

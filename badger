@@ -3,10 +3,13 @@
 let XDG_STATE_HOME = ($env.XDG_STATE_HOME? | default $"($env.HOME)/.local/state")
 let BADGER_STATE_DIR = $"($XDG_STATE_HOME)/badger"
 
+# Publish and view notifications in your terminal
 def main [] {
-  mkdir $BADGER_STATE_DIR
+  const SELF = path self
+  ^$SELF --help
 }
 
+# Publish a notification
 def "main publish" [
   message: string
   --level(-l) = "info"
@@ -25,6 +28,7 @@ def "main publish" [
   }
 }
 
+# Display the next notification in the list
 def "main next" [
   --peek(-p)    # don't take it out of the queue
   --verbose(-v)
@@ -47,10 +51,12 @@ def "main next" [
   $result | print
 }
 
+# Get notification count
 def "main count" [] {
   list-notification-files | length | print
 }
 
+# Determine by exit code if notifications are pending
 def "main pending" [] {
   if (list-notification-files | is-empty) {
     exit 1  # don't display anything in the prompt
