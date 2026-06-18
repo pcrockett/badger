@@ -51,6 +51,12 @@ def "main count" [] {
   list-notification-files | length | print
 }
 
+def "main pending" [] {
+  if (list-notification-files | is-empty) {
+    exit 1  # don't display anything in the prompt
+  }
+}
+
 def save-notification []: record -> string {
   let payload = $in
   mkdir $BADGER_STATE_DIR

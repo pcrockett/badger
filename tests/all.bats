@@ -131,3 +131,18 @@ source tests/util.sh
   assert_stdout "^1$"
   assert_exit_code 0
 }
+
+@test 'pending - no notifications - exit code 1' {
+  capture_output badger pending
+  assert_no_stdout
+  assert_no_stderr
+  assert_exit_code 1
+}
+
+@test 'pending - notifications - exit code 0' {
+  badger publish hi
+  capture_output badger pending
+  assert_no_stdout
+  assert_no_stderr
+  assert_exit_code 0
+}
