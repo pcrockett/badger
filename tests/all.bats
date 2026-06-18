@@ -106,3 +106,28 @@ source tests/util.sh
   assert_stdout "file    │ /tmp/bats-home\..+\.json"
   assert_exit_code 0
 }
+
+@test 'count - always - counts notifications' {
+  capture_output badger count
+  assert_no_stderr
+  assert_stdout "^0$"
+  assert_exit_code 0
+
+  badger publish "hello"
+  capture_output badger count
+  assert_no_stderr
+  assert_stdout "^1$"
+  assert_exit_code 0
+
+  badger publish "hello again"
+  capture_output badger count
+  assert_no_stderr
+  assert_stdout "^2$"
+  assert_exit_code 0
+
+  badger next &>/dev/null
+  capture_output badger count
+  assert_no_stderr
+  assert_stdout "^1$"
+  assert_exit_code 0
+}

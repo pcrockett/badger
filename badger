@@ -47,6 +47,10 @@ def "main next" [
   $result | print
 }
 
+def "main count" [] {
+  list-notification-files | length | print
+}
+
 def save-notification []: record -> string {
   let payload = $in
   mkdir $BADGER_STATE_DIR
@@ -86,12 +90,16 @@ def save-notification []: record -> string {
 }
 
 def next-notification-file []: nothing -> string {
+  list-notification-files | first
+}
+
+def list-notification-files []: nothing -> list<string> {
   try {
-    ls $BADGER_STATE_DIR | first | get --optional name
+    ls $BADGER_STATE_DIR | each { $in.name }
   } catch {|err|
     let err_metadata = $err.json? | default "{}" | from json
     if ($err_metadata.code? == "nu::shell::io::not_found") {
-      null
+      []
     } else {
       error make $err
     }
