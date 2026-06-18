@@ -63,7 +63,22 @@ def "main pending" [] {
   }
 }
 
+# WIP: Run a command and publish a notification if it exits non-zero
 def "main run" [...args] {
+
+  # unfortunately nushell script parameter parsing is a bit of a mess. there are
+  # different ways you can do it, but they all have their quirks. for example:
+  #
+  # - the [...args] method makes it impossible to pass anything that starts with a
+  #   hyphen, i.e. `badger run nu -c ...` because it'll be interpreted as a parameter
+  #   for THIS function.
+  # - if we use [args: string] then we couldn't run the "false" command because it gets
+  #   recognized as a bool rather than treated as a string, generating a parse error.
+  # - if we use [args: list<string>] then we have to specify weird brackets around it
+  #
+  # etc. i think until nushell gets production-ready, we'll have to accept that we need
+  # a different language to represent what we're trying to do here.
+
   let result = ^$args | tee { print } | complete
   if $result.exit_code == 0 {
     exit
