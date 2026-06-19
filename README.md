@@ -30,4 +30,3 @@ _on my old laptop from 2008 this adds about 50ms to the prompt time._
 this is currently a minimum viable product. if i have time:
 
 - [ ] create interactive `fzf` interface
-- [ ] add metadata to notifications
