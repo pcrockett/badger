@@ -186,3 +186,24 @@ source tests/util.sh
   "file": "/tmp/bats-home\..+\.json"
 }$'
 }
+
+@test 'publish - json on stdin - records data' {
+  capture_output badger publish hello --data - <<EOF
+{"foo": "bar", "whatever": true}
+EOF
+
+  assert_exit_code 0
+
+  capture_output badger next --format json
+  assert_no_stderr
+  assert_exit_code 0
+  assert_stdout '^\{
+  "message": "hello",
+  "level": "info",
+  "data": \{
+    "foo": "bar",
+    "whatever": true
+  },
+  "file": "/tmp/bats-home\..+\.json"
+}$'
+}

@@ -1,4 +1,4 @@
-#!/usr/bin/env nu
+#!/usr/bin/env -S nu --stdin
 
 let XDG_STATE_HOME = ($env.XDG_STATE_HOME? | default $"($env.HOME)/.local/state")
 let BADGER_STATE_DIR = $"($XDG_STATE_HOME)/badger"
@@ -14,8 +14,14 @@ def "main publish" [
   message: string
   --level(-l) = "info"
   --verbose(-v)
-  --data(-d): string     # JSON data you want to ride along with your notification
+  --data(-d): string     # JSON data to attach (`-` to read stdin)
 ] {
+  let data = if ($data == "-") {
+    $in
+  } else {
+    $data
+  }
+
   let file_path = (
     {
       message: $message
@@ -46,7 +52,9 @@ def "main next" [
     verbose => { ($payload | table --expand) }
     json    => { ($payload | to json) }
     _       => {
-      error make { msg: $"Unrecognized format: `($format)` -- can only be one of quiet, verbose, json" }
+      error make {
+        msg: $"Unrecognized format: `($format)` -- can only be one of quiet, verbose, json"
+      }
     }
   }
 
