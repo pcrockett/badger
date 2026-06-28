@@ -34,24 +34,7 @@ jobs:
         with:
           tool: just@1.51.0,shfmt@3.13.1
 
-      - name: Setup Bats
-        run: |
-          tmp_dir="$(mktemp --directory)"
-
-          # clone v1.13.0
-          git clone \
-            --revision 3bca150ec86275d6d9d5a4fd7d48ab8b6c6f3d87 \
-            --depth 1 \
-            https://github.com/bats-core/bats-core.git \
-            "${tmp_dir}"
-
-          cd "${tmp_dir}"
-          mkdir --parent ~/.local/share/bats
-          ./install.sh ~/.local/share/bats
-
-          mkdir --parent ~/.local/bin
-          ln --symbolic ~/.local/share/bats/bin/bats ~/.local/bin/bats
-          echo ~/.local/bin >>"${GITHUB_PATH}"
+      - uses: pcrockett/setup-bats@b791173505d0a1947d46793e9aae33a962cfd949  # v0.1.0
 
       - name: Setup Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
