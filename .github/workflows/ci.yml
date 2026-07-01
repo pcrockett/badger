@@ -30,7 +30,7 @@ jobs:
           check-latest: true  # intentionally not pinning while nushell is unstable
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: taiki-e/install-action@bffeee26d4db9be238a4ea78d8826604ebcb594d  # v2.82.5
+      - uses: taiki-e/install-action@16b05812d776ae1dfaabc8277e421fb6d2506419  # v2.82.7
         with:
           tool: just@1.51.0,shfmt@3.13.1
 
