@@ -1,8 +1,7 @@
 use std::{
     env,
     fs::{File, read_dir},
-    io::{ErrorKind, Write},
-    os::unix::fs::DirEntryExt,
+    io::{ErrorKind, Read, Write},
     path::PathBuf,
 };
 
@@ -44,19 +43,34 @@ pub fn publish(args: PublishArgs) -> Result<()> {
 }
 
 pub fn next(args: NextArgs) -> Result<()> {
-    let all_entries = read_dir(badger_state_dir())?;
-    for entry in all_entries {
-        let path = entry?.path();
-        if path.is_file() {
-            println!("TODO: read {}", path.to_str().unwrap());
-            return Ok(());
-        }
+    let mut all_entries = read_dir(badger_state_dir())?
+        .filter(|x| x.is_ok())
+        .map(|x| x.unwrap().path())
+        .filter(|x| x.is_file())
+        .collect::<Vec<PathBuf>>();
+    all_entries.sort();
+    let Some(next_file) = all_entries.get(0) else {
+        return Ok(());
+    };
+
+    let mut data = String::new();
+    {
+        let mut file = File::open(next_file)?;
+        file.read_to_string(&mut data)?;
     }
-    println!(
-        "subcommand:next peek:{} format:{}",
-        args.peek,
-        args.format.unwrap_or("quiet".to_owned())
-    );
+    let parsed: Notification = from_str(data.as_str())?;
+
+    let format = args.format.unwrap_or("quiet".to_owned());
+    match format.as_str() {
+        "quiet" => println!("{}", parsed.message),
+        "verbose" => panic!("verbose not implemented yet"),
+        "json" => println!("{}", data),
+        _ => bail!(
+            "Unrecognized format: `{}`. Expected quiet, verbose, or json.",
+            format
+        ),
+    }
+    std::fs::remove_file(next_file)?;
     Ok(())
 }
 
