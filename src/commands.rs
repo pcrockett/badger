@@ -1,6 +1,6 @@
 use std::{
     env,
-    fs::{File, read_dir},
+    fs::{File, create_dir_all, read_dir},
     io::{ErrorKind, Read, Write},
     path::PathBuf,
     process::exit,
@@ -44,7 +44,7 @@ pub fn publish(args: PublishArgs) -> Result<()> {
 }
 
 pub fn next(args: NextArgs) -> Result<()> {
-    let mut all_entries: Vec<PathBuf> = read_dir(badger_state_dir())?
+    let mut all_entries: Vec<PathBuf> = read_dir(badger_state_dir()?)?
         .filter(|x| x.is_ok())
         .map(|x| x.unwrap().path())
         .filter(|x| x.is_file())
@@ -76,7 +76,7 @@ pub fn next(args: NextArgs) -> Result<()> {
 }
 
 pub fn count() -> Result<()> {
-    let count = read_dir(badger_state_dir())?
+    let count = read_dir(badger_state_dir()?)?
         .filter(|x| x.is_ok())
         .map(|x| x.unwrap().path())
         .filter(|x| x.is_file())
@@ -86,7 +86,7 @@ pub fn count() -> Result<()> {
 }
 
 pub fn pending() -> Result<()> {
-    let result: Vec<()> = read_dir(badger_state_dir())?
+    let result: Vec<()> = read_dir(badger_state_dir()?)?
         .filter(|x| x.is_ok())
         .map(|_| ())
         .take(1)
@@ -99,12 +99,14 @@ pub fn pending() -> Result<()> {
     }
 }
 
-fn badger_state_dir() -> PathBuf {
+fn badger_state_dir() -> Result<PathBuf> {
     let state_home = env::var("XDG_STATE_HOME").unwrap_or_else(|_| {
         let home = env::var("HOME").unwrap();
         format!("{}/.local/state", home)
     });
-    PathBuf::from(state_home).join("badger")
+    let path = PathBuf::from(state_home).join("badger");
+    create_dir_all(&path)?;
+    Ok(path)
 }
 
 fn into_json_value(data: String) -> Value {
@@ -115,7 +117,7 @@ fn into_json_value(data: String) -> Value {
 }
 
 fn save_notification(notification: Notification) -> Result<PathBuf> {
-    let state_dir = badger_state_dir();
+    let state_dir = badger_state_dir()?;
     let timestamp = env::var("BADGER_TIMESTAMP")
         .unwrap_or_else(|_| Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Micros, false));
 

@@ -5,7 +5,7 @@ setup() {
   TEST_CWD="$(mktemp --directory --tmpdir=/tmp bats-test.XXXXXX)"
   TEST_HOME="$(mktemp --directory --tmpdir=/tmp bats-home.XXXXXX)"
   mkdir -p "${TEST_HOME}/.local/bin"
-  cp badger "${TEST_HOME}/.local/bin"
+  cp target/release/badger "${TEST_HOME}/.local/bin"
   test -f .tool-versions && cp .tool-versions "${TEST_CWD}"
   cd "${TEST_CWD}"
   PATH="${TEST_HOME}/.local/bin:${PATH}"

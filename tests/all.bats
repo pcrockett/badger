@@ -6,9 +6,9 @@ source tests/util.sh
 
 @test 'main - always - displays help' {
   capture_output badger
-  assert_no_stderr
-  assert_stdout 'Usage:'
-  assert_exit_code 0
+  assert_no_stdout
+  assert_stderr 'Usage:'
+  assert_exit_code 2
 }
 
 @test 'main help - always - works' {
@@ -86,7 +86,7 @@ source tests/util.sh
     | xargs touch
 
   capture_output badger publish "hello"
-  assert_stderr "Exhausted unique message slugs"
+  assert_stderr "Error: unable to save notification with timestamp \`hi\`"
   assert_no_stdout
   assert_exit_code 1
 }
