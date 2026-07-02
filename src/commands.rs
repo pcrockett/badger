@@ -1,7 +1,8 @@
 use std::{
     env,
-    fs::File,
+    fs::{File, read_dir},
     io::{ErrorKind, Write},
+    os::unix::fs::DirEntryExt,
     path::PathBuf,
 };
 
@@ -43,6 +44,14 @@ pub fn publish(args: PublishArgs) -> Result<()> {
 }
 
 pub fn next(args: NextArgs) -> Result<()> {
+    let all_entries = read_dir(badger_state_dir())?;
+    for entry in all_entries {
+        let path = entry?.path();
+        if path.is_file() {
+            println!("TODO: read {}", path.to_str().unwrap());
+            return Ok(());
+        }
+    }
     println!(
         "subcommand:next peek:{} format:{}",
         args.peek,
@@ -81,7 +90,7 @@ fn save_notification(notification: Notification) -> Result<PathBuf> {
     let timestamp = env::var("BADGER_TIMESTAMP")
         .unwrap_or_else(|_| Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Micros, false));
 
-    for index in 0..=2 {
+    for index in 0..=999 {
         let path = state_dir.join(format!("{}_{:03}.json", timestamp, index));
         let create_result = File::create_new(&path);
         if let Ok(file) = create_result {
