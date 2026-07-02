@@ -3,6 +3,7 @@ use std::{
     fs::{File, read_dir},
     io::{ErrorKind, Read, Write},
     path::PathBuf,
+    process::exit,
 };
 
 use crate::cli::{NextArgs, PublishArgs};
@@ -43,11 +44,11 @@ pub fn publish(args: PublishArgs) -> Result<()> {
 }
 
 pub fn next(args: NextArgs) -> Result<()> {
-    let mut all_entries = read_dir(badger_state_dir())?
+    let mut all_entries: Vec<PathBuf> = read_dir(badger_state_dir())?
         .filter(|x| x.is_ok())
         .map(|x| x.unwrap().path())
         .filter(|x| x.is_file())
-        .collect::<Vec<PathBuf>>();
+        .collect();
     all_entries.sort();
     let Some(next_file) = all_entries.get(0) else {
         return Ok(());
@@ -75,13 +76,27 @@ pub fn next(args: NextArgs) -> Result<()> {
 }
 
 pub fn count() -> Result<()> {
-    println!("subcommand:count");
+    let count = read_dir(badger_state_dir())?
+        .filter(|x| x.is_ok())
+        .map(|x| x.unwrap().path())
+        .filter(|x| x.is_file())
+        .count();
+    println!("{}", count);
     Ok(())
 }
 
 pub fn pending() -> Result<()> {
-    println!("subcommand:pending");
-    Ok(())
+    let result: Vec<()> = read_dir(badger_state_dir())?
+        .filter(|x| x.is_ok())
+        .map(|_| ())
+        .take(1)
+        .collect();
+
+    if Some(&()) == result.get(0) {
+        Ok(())
+    } else {
+        exit(1);
+    }
 }
 
 fn badger_state_dir() -> PathBuf {
