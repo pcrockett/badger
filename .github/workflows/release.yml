@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://www.schemastore.org/github-workflow.json
+
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        type: string
+        required: true
+
+env:
+  CARGO_TERM_COLOR: always
+  # Fail CI on all warnings
+  RUSTFLAGS: "-Dwarnings"
+
+jobs:
+
+  lint-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+      - uses: ./.github/setup-env/
+      - run: just lint
+      - run: just test
+      - run: |
+          gh release create "${RELEASE_TAG}" \
+            --draft \
+            --generate-notes \
+            --fail-on-no-commits \
+            target/release/badger
+        env:
+          RELEASE_TAG: "${{ inputs.tag }}"
