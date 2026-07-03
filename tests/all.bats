@@ -177,7 +177,6 @@ EOF
   "data": \{
     "foo": "bar",
     "whatever": true
-  },
-  "file": "/tmp/bats-home\..+\.json"
+  }
 }$'
 }

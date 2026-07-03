@@ -10,23 +10,31 @@ use crate::cli::{NextArgs, PublishArgs};
 use anyhow::{Result, bail};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
-use serde_json::{Value, from_str};
+use serde_json;
 
 #[derive(Serialize, Deserialize)]
 struct Notification {
     message: String,
     level: String,
-    data: Option<Value>,
+    data: Option<serde_json::Value>,
 }
 
 pub fn publish(args: PublishArgs) -> Result<()> {
-    let data = match args.data.clone() {
+    let data = if args.data == Some("-".to_owned()) {
+        let mut buf = String::new();
+        std::io::stdin().read_to_string(&mut buf)?;
+        Some(buf)
+    } else {
+        args.data
+    };
+
+    let data = match data {
         Some(val) => Some(into_json_value(val)),
         None => None,
     };
     let path = save_notification(Notification {
-        message: args.message.clone(),
-        level: args.level.clone().unwrap_or("info".to_owned()),
+        message: args.message,
+        level: args.level.unwrap_or("info".to_owned()),
         data: data,
     })?;
 
@@ -53,7 +61,7 @@ pub fn next(args: NextArgs) -> Result<()> {
         let mut file = File::open(next_file)?;
         file.read_to_string(&mut data)?;
     }
-    let parsed: Notification = from_str(data.as_str())?;
+    let parsed: Notification = serde_json::from_str(data.as_str())?;
 
     let format = args.format.unwrap_or("quiet".to_owned());
     match format.as_str() {
@@ -105,10 +113,10 @@ fn badger_state_dir() -> Result<PathBuf> {
     Ok(path)
 }
 
-fn into_json_value(data: String) -> Value {
-    match from_str(data.as_str()) {
+fn into_json_value(data: String) -> serde_json::Value {
+    match serde_json::from_str(data.as_str()) {
         Ok(val) => val,
-        Err(_) => Value::String(data),
+        Err(_) => serde_json::Value::String(data),
     }
 }
 
