@@ -104,16 +104,6 @@ source tests/util.sh
   assert_exit_code 0
 }
 
-@test 'next - verbose - shows additional details' {
-  badger publish "this is a test"
-  capture_output badger next --format verbose
-  assert_no_stderr
-  assert_stdout "message +│ this is a test"
-  assert_stdout "level   +│ info"
-  assert_stdout "file    +│ /tmp/bats-home\..+\.json"
-  assert_exit_code 0
-}
-
 @test 'count - always - counts notifications' {
   capture_output badger count
   assert_no_stderr
@@ -154,21 +144,6 @@ source tests/util.sh
   assert_exit_code 0
 }
 
-@test 'publish - data - records data' {
-  capture_output badger publish hello --data '{"foo": "bar", "whatever": true}'
-  assert_no_stdout
-  assert_no_stderr
-  assert_exit_code 0
-
-  capture_output badger next --format verbose
-  assert_no_stderr
-  assert_exit_code 0
-  assert_stdout "message +│ hello"
-  assert_stdout "level   +│ info"
-  assert_stdout "data    +│ │ foo      +│ bar"
-  assert_stdout "        +│ │ whatever +│ true"
-}
-
 @test 'next - json - outputs json' {
   capture_output badger publish hello --data '{"foo": "bar", "whatever": true}'
   assert_exit_code 0
@@ -182,8 +157,7 @@ source tests/util.sh
   "data": \{
     "foo": "bar",
     "whatever": true
-  },
-  "file": "/tmp/bats-home\..+\.json"
+  }
 }$'
 }
 

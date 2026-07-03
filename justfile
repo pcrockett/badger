@@ -2,12 +2,16 @@
 _default:
     @just --list
 
+# Run cargo build
+build profile="dev":
+    cargo build --profile {{profile}}
+
 # Run pre-commit on all files
 lint:
     pre-commit run --all --show-diff-on-failure --color always
 
 # Run bats tests
-test:
+test: (build "release")
     bats ./tests
 
 # Install badger to ~/.local/bin

@@ -20,10 +20,10 @@ when = 'badger pending'
 symbol = '󱅫'             # nerd font: <https://www.nerdfonts.com/>
 style = 'fg:226 bg:124'  # ansi colors: red background, yellow foreground
 format = '[ $symbol ]($style) '
-shell = ['nu']
+shell = ['sh']
 ```
 
-_on my old laptop from 2008 this adds about 50ms to the prompt time._
+_on my old laptop from 2008 this adds about 4ms to the prompt time._
 
 ## todo
 

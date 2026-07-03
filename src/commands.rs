@@ -24,20 +24,14 @@ pub fn publish(args: PublishArgs) -> Result<()> {
         Some(val) => Some(into_json_value(val)),
         None => None,
     };
-    save_notification(Notification {
+    let path = save_notification(Notification {
         message: args.message.clone(),
         level: args.level.clone().unwrap_or("info".to_owned()),
         data: data,
     })?;
 
     if args.verbose {
-        println!(
-            "subcommand:publish message:{} level:{} verbose:{} data:{}",
-            args.message,
-            args.level.unwrap_or("info".to_owned()),
-            args.verbose,
-            args.data.unwrap_or("".to_owned())
-        );
+        println!("Saved to {}", path.to_str().unwrap());
     }
 
     Ok(())
@@ -64,14 +58,16 @@ pub fn next(args: NextArgs) -> Result<()> {
     let format = args.format.unwrap_or("quiet".to_owned());
     match format.as_str() {
         "quiet" => println!("{}", parsed.message),
-        "verbose" => panic!("verbose not implemented yet"),
         "json" => println!("{}", data),
         _ => bail!(
-            "Unrecognized format: `{}`. Expected quiet, verbose, or json.",
+            "Unrecognized format: `{}`. Expected `quiet` or `json`.",
             format
         ),
     }
-    std::fs::remove_file(next_file)?;
+
+    if !args.peek {
+        std::fs::remove_file(next_file)?;
+    }
     Ok(())
 }
 
