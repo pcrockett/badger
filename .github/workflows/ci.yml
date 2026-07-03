@@ -22,31 +22,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
-
-      - uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6  # v1.16.1
-        with:
-          components: rustfmt, clippy
-
-      - uses: taiki-e/install-action@16b05812d776ae1dfaabc8277e421fb6d2506419  # v2.82.7
-        with:
-          tool: just@1.51.0,shfmt@3.13.1
-
-      - uses: pcrockett/setup-bats@4d1e65e0e5e054a6264804f875e3e9dbd217542b  # v0.1.1
-
-      - name: Setup Python
-        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
-
-      - uses: pcrockett/setup-yamlfmt@2949e59bb1f6d24f519d0dfa2560a0dbcd563fcc  # v0.1.1
-
-      # borrowed /modified the following from <https://github.com/pre-commit/action/blob/main/action.yml>
-      - run: python -m pip install pre-commit
-      - run: python -m pip freeze --local
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
-        with:
-          path: ~/.cache/pre-commit
-          key: pre-commit-3|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
-
+      - uses: ./.github/setup-env/
       - run: just lint
       - run: just test
