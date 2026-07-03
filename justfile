@@ -15,5 +15,5 @@ test: (build "release")
     bats ./tests
 
 # Install badger to ~/.local/bin
-install:
-    install badger ~/.local/bin
+install: (build "release")
+    install target/release/badger ~/.local/bin
