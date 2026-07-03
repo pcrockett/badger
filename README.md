@@ -4,11 +4,11 @@ dead simple notifications without a daemon, in your terminal
 
 simply manipulates files in `~/.local/state/badger`:
 
-- `badger publish` adds a file to the directory
+- `badger publish` adds a file to the directory with contents you specify
 - `badger next` displays the oldest file in the directory and deletes it
 - `badger pending` makes it easy to use in terminal prompt functions
 
-written in [nushell](https://www.nushell.sh/)
+written in rust (btw).
 
 ## starship
 

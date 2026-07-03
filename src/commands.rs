@@ -1,16 +1,15 @@
 use std::{
     env,
-    fs::{File, create_dir_all, read_dir},
+    fs::{create_dir_all, read_dir, File},
     io::{ErrorKind, Read, Write},
     path::PathBuf,
     process::exit,
 };
 
 use crate::cli::{NextArgs, PublishArgs};
-use anyhow::{Result, bail};
+use anyhow::{bail, Result};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
-use serde_json;
 
 #[derive(Serialize, Deserialize)]
 struct Notification {
@@ -28,14 +27,11 @@ pub fn publish(args: PublishArgs) -> Result<()> {
         args.data
     };
 
-    let data = match data {
-        Some(val) => Some(into_json_value(val)),
-        None => None,
-    };
+    let data = data.map(into_json_value);
     let path = save_notification(Notification {
         message: args.message,
         level: args.level.unwrap_or("info".to_owned()),
-        data: data,
+        data,
     })?;
 
     if args.verbose {
@@ -52,7 +48,7 @@ pub fn next(args: NextArgs) -> Result<()> {
         .filter(|x| x.is_file())
         .collect();
     all_entries.sort();
-    let Some(next_file) = all_entries.get(0) else {
+    let Some(next_file) = all_entries.first() else {
         return Ok(());
     };
 
@@ -96,7 +92,7 @@ pub fn pending() -> Result<()> {
         .take(1)
         .collect();
 
-    if Some(&()) == result.get(0) {
+    if Some(&()) == result.first() {
         Ok(())
     } else {
         exit(1);
