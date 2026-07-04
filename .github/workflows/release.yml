@@ -4,10 +4,6 @@ name: Release
 
 on:
   workflow_dispatch:
-    inputs:
-      tag:
-        type: string
-        required: true
 
 env:
   CARGO_TERM_COLOR: always
@@ -28,10 +24,9 @@ jobs:
       - run: just lint
       - run: just test
       - run: |
-          gh release create "${RELEASE_TAG}" \
+          version="$(./target/release/badger --version | cut -d" " -f2)"
+          gh release create "v${version}" \
             --draft \
             --generate-notes \
             --fail-on-no-commits \
             target/release/badger
-        env:
-          RELEASE_TAG: "${{ inputs.tag }}"

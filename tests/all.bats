@@ -180,3 +180,12 @@ EOF
   }
 }$'
 }
+
+@test 'version - always - returns consistent format' {
+  capture_output badger --version
+  assert_exit_code 0
+  assert_no_stderr
+
+  # if this format ever changes, don't forget to modify the release workflow
+  assert_stdout '^badger [[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$'
+}

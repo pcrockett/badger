@@ -17,3 +17,7 @@ test: (build "release")
 # Install badger to ~/.local/bin
 install: (build "release")
     install target/release/badger ~/.local/bin
+
+# Start release GitHub workflow
+release:
+    gh workflow run release.yml
