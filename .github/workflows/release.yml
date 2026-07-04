@@ -25,6 +25,8 @@ jobs:
       - run: just lint
       - run: just test
       - name: Build and release
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           version="$(./target/x86_64-unknown-linux-gnu/release/badger --version | cut -d" " -f2)"
           if [ "${version}" == "" ]; then
