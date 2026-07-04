@@ -39,7 +39,6 @@ jobs:
             mv "target/${target}/release/badger" "artifacts/badger-${target}"
           done
           gh release create "v${version}" \
-            --draft \
             --generate-notes \
             --fail-on-no-commits \
             artifacts/*
