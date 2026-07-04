@@ -25,3 +25,9 @@ shell = ['sh']
 ```
 
 _on my old laptop from 2008 this adds about 4ms to the prompt time._
+
+## install
+
+1. download the executable from [releases](https://github.com/pcrockett/badger/releases)
+2. `mv badger-x86_64-unknown-linux-gnu badger && chmod +x badger`
+3. put the executable somewhere in your `$PATH`
