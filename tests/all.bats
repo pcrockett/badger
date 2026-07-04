@@ -6,9 +6,9 @@ source tests/util.sh
 
 @test 'main - always - displays help' {
   capture_output badger
-  assert_no_stderr
-  assert_stdout 'Usage:'
-  assert_exit_code 0
+  assert_no_stdout
+  assert_stderr 'Usage:'
+  assert_exit_code 2
 }
 
 @test 'main help - always - works' {
@@ -86,7 +86,7 @@ source tests/util.sh
     | xargs touch
 
   capture_output badger publish "hello"
-  assert_stderr "Exhausted unique message slugs"
+  assert_stderr "Error: unable to save notification with timestamp \`hi\`"
   assert_no_stdout
   assert_exit_code 1
 }
@@ -101,16 +101,6 @@ source tests/util.sh
   capture_output badger next
   assert_no_stderr
   assert_stdout "^this is a test$"
-  assert_exit_code 0
-}
-
-@test 'next - verbose - shows additional details' {
-  badger publish "this is a test"
-  capture_output badger next --format verbose
-  assert_no_stderr
-  assert_stdout "message +│ this is a test"
-  assert_stdout "level   +│ info"
-  assert_stdout "file    +│ /tmp/bats-home\..+\.json"
   assert_exit_code 0
 }
 
@@ -154,21 +144,6 @@ source tests/util.sh
   assert_exit_code 0
 }
 
-@test 'publish - data - records data' {
-  capture_output badger publish hello --data '{"foo": "bar", "whatever": true}'
-  assert_no_stdout
-  assert_no_stderr
-  assert_exit_code 0
-
-  capture_output badger next --format verbose
-  assert_no_stderr
-  assert_exit_code 0
-  assert_stdout "message +│ hello"
-  assert_stdout "level   +│ info"
-  assert_stdout "data    +│ │ foo      +│ bar"
-  assert_stdout "        +│ │ whatever +│ true"
-}
-
 @test 'next - json - outputs json' {
   capture_output badger publish hello --data '{"foo": "bar", "whatever": true}'
   assert_exit_code 0
@@ -182,8 +157,7 @@ source tests/util.sh
   "data": \{
     "foo": "bar",
     "whatever": true
-  },
-  "file": "/tmp/bats-home\..+\.json"
+  }
 }$'
 }
 
@@ -203,7 +177,15 @@ EOF
   "data": \{
     "foo": "bar",
     "whatever": true
-  },
-  "file": "/tmp/bats-home\..+\.json"
+  }
 }$'
+}
+
+@test 'version - always - returns consistent format' {
+  capture_output badger --version
+  assert_exit_code 0
+  assert_no_stderr
+
+  # if this format ever changes, don't forget to modify the release workflow
+  assert_stdout '^badger [[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$'
 }

@@ -42,3 +42,16 @@ repos:
         language: system
         types:
           - yaml
+      - id: clippy
+        name: clippy
+        entry: cargo clippy --fix --allow-dirty
+        language: system
+        pass_filenames: false
+        types:
+          - rust
+      - id: rustfmt
+        name: rustfmt
+        entry: rustfmt
+        language: system
+        types:
+          - rust
