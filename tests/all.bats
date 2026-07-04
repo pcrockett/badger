@@ -189,3 +189,67 @@ EOF
   # if this format ever changes, don't forget to modify the release workflow
   assert_stdout '^badger [[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$'
 }
+
+@test 'run - zero exit - does not publish' {
+  capture_output badger run true
+  assert_exit_code 0
+  assert_no_stderr
+  assert_no_stdout
+  test "$(badger count)" == "0"
+}
+
+@test 'run - nonzero exit - publishes' {
+  capture_output badger run false
+  assert_exit_code 1
+  assert_no_stderr
+  assert_no_stdout
+
+  capture_output badger next --format json
+
+  # shellcheck disable=SC2016
+  assert_stdout '^\{
+  "message": "`false` exited with code 1.",
+  "level": "error",
+  "data": \{
+    "command": "false",
+    "exit_code": 1,
+    "signal": null
+  }
+}$'
+}
+
+@test 'run - always - preserves stdin' {
+  capture_output badger run cat < <(echo foo)
+  assert_exit_code 0
+  assert_no_stderr
+  assert_stdout "^foo$"
+
+  capture_output badger run "cat; exit 1" < <(echo foo)
+  assert_exit_code 1
+  assert_no_stderr
+  assert_stdout "^foo$"
+}
+
+@test 'run - always - preserves stdout' {
+  capture_output badger run "echo foo"
+  assert_exit_code 0
+  assert_no_stderr
+  assert_stdout "^foo$"
+
+  capture_output badger run "echo foo; exit 1"
+  assert_exit_code 1
+  assert_no_stderr
+  assert_stdout "^foo$"
+}
+
+@test 'run - always - preserves stderr' {
+  capture_output badger run "echo foo >&2"
+  assert_exit_code 0
+  assert_no_stdout
+  assert_stderr "^foo$"
+
+  capture_output badger run "echo foo >&2; exit 1"
+  assert_exit_code 1
+  assert_no_stdout
+  assert_stderr "^foo$"
+}

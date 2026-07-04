@@ -15,6 +15,9 @@ pub enum CliCommand {
     /// Publish a notification
     Publish(PublishArgs),
 
+    /// Run a command and publish a notification if it fails
+    Run(RunArgs),
+
     /// Display the next notification in the list
     Next(NextArgs),
 
@@ -37,6 +40,14 @@ pub struct PublishArgs {
 
     #[arg(short, long)]
     pub data: Option<String>,
+}
+
+#[derive(Args)]
+pub struct RunArgs {
+    pub command: String,
+
+    #[arg(short, long)]
+    pub shell: Option<String>,
 }
 
 #[derive(Args)]

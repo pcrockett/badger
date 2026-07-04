@@ -2,11 +2,12 @@ use std::{
     env,
     fs::{create_dir_all, read_dir, File},
     io::{ErrorKind, Read, Write},
+    os::unix::process::ExitStatusExt,
     path::PathBuf,
-    process::exit,
+    process::{exit, Command, Stdio},
 };
 
-use crate::cli::{NextArgs, PublishArgs};
+use crate::cli::{NextArgs, PublishArgs, RunArgs};
 use anyhow::{bail, Result};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
@@ -39,6 +40,41 @@ pub fn publish(args: PublishArgs) -> Result<()> {
     }
 
     Ok(())
+}
+
+pub fn run(args: RunArgs) -> Result<()> {
+    let command = args.command;
+    let mut child = Command::new(args.shell.unwrap_or("bash".to_owned()))
+        .args(["-c", command.as_str()])
+        .stdin(Stdio::inherit())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .spawn()?;
+    let result = child.wait()?;
+    if result.success() {
+        return Ok(());
+    }
+
+    let message = match result.code() {
+        Some(code) => format!("`{command}` exited with code {code}."),
+        None => {
+            let signal = result.signal().unwrap();
+            format!("`{command}` was terminated with signal {signal}.")
+        }
+    };
+    let metadata = serde_json::json!({
+        "command": command,
+        "exit_code": result.code(),
+        "signal": result.signal(),
+    });
+    publish(PublishArgs {
+        message,
+        level: Some("error".to_owned()),
+        verbose: false,
+        data: Some(metadata.to_string()),
+    })?;
+
+    exit(result.code().unwrap_or(1));
 }
 
 pub fn next(args: NextArgs) -> Result<()> {
