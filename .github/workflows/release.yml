@@ -23,12 +23,9 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
       - uses: ./.github/setup-env/
       - run: just lint
-      - run: |
-          for target in ${TARGETS_TO_BUILD}; do
-            echo "build / test for ${target}..."
-            just test "${target}"
-          done
-      - run: |
+      - run: just test
+      - name: Build and release
+        run: |
           version="$(./target/x86_64-unknown-linux-gnu/release/badger --version | cut -d" " -f2)"
           if [ "${version}" == "" ]; then
             echo "error determining version"
@@ -36,6 +33,7 @@ jobs:
           fi
           mkdir artifacts
           for target in ${TARGETS_TO_BUILD}; do
+            just build release "${target}"
             mv "target/${target}/release/badger" "artifacts/badger-${target}"
           done
           gh release create "v${version}" \

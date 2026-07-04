@@ -8,7 +8,8 @@ simply manipulates files in `~/.local/state/badger`:
 - `badger next` displays the oldest file in the directory and deletes it
 - `badger pending` makes it easy to use in terminal prompt functions
 
-written in rust (btw).
+currently only the `x86_64-unknown-linux-gnu` platform triple is supported. PRs adding
+support for other platforms are welcome.
 
 ## starship
 
@@ -24,9 +25,3 @@ shell = ['sh']
 ```
 
 _on my old laptop from 2008 this adds about 4ms to the prompt time._
-
-## todo
-
-this is currently a minimum viable product. if i have time:
-
-- [ ] create interactive `fzf` interface
