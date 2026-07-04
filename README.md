@@ -5,6 +5,7 @@ dead simple notifications without a daemon, in your terminal
 simply manipulates files in `~/.local/state/badger`:
 
 - `badger publish` adds a file to the directory with contents you specify
+- `badger run` run a command and publish a notification if it fails
 - `badger next` displays the oldest file in the directory and deletes it
 - `badger pending` makes it easy to use in terminal prompt functions
 
