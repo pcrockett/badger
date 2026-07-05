@@ -36,7 +36,7 @@ pub fn publish(args: PublishArgs) -> Result<()> {
     })?;
 
     if args.verbose {
-        println!("Saved to {}", path.to_str().unwrap());
+        println!("Saved to {}", path.to_str().expect("unable to unwrap path"));
     }
 
     Ok(())
@@ -58,7 +58,7 @@ pub fn run(args: RunArgs) -> Result<()> {
     let message = match result.code() {
         Some(code) => format!("`{command}` exited with code {code}."),
         None => {
-            let signal = result.signal().unwrap();
+            let signal = result.signal().expect("could not unwrap signal");
             format!("`{command}` was terminated with signal {signal}.")
         }
     };
@@ -80,7 +80,7 @@ pub fn run(args: RunArgs) -> Result<()> {
 pub fn next(args: NextArgs) -> Result<()> {
     let mut all_entries: Vec<PathBuf> = read_dir(badger_state_dir()?)?
         .filter(|x| x.is_ok())
-        .map(|x| x.unwrap().path())
+        .map(|x| x.expect("unable to unwrap dir entry").path())
         .filter(|x| x.is_file())
         .collect();
     all_entries.sort();
@@ -114,7 +114,7 @@ pub fn next(args: NextArgs) -> Result<()> {
 pub fn count() -> Result<()> {
     let count = read_dir(badger_state_dir()?)?
         .filter(|x| x.is_ok())
-        .map(|x| x.unwrap().path())
+        .map(|x| x.expect("unable to unwrap dir entry").path())
         .filter(|x| x.is_file())
         .count();
     println!("{}", count);
@@ -137,7 +137,7 @@ pub fn pending() -> Result<()> {
 
 fn badger_state_dir() -> Result<PathBuf> {
     let state_home = env::var("XDG_STATE_HOME").unwrap_or_else(|_| {
-        let home = env::var("HOME").unwrap();
+        let home = env::var("HOME").expect("no HOME env variable");
         format!("{}/.local/state", home)
     });
     let path = PathBuf::from(state_home).join("badger");
