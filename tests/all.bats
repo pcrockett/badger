@@ -222,10 +222,12 @@ EOF
   badger run "sleep 10" &
   badger_pid=$!
   sleep 1
+  badger_processes="$(ps --ppid "${badger_pid}" -o pid,cmd --no-headers)"
   sleep_pid="$(
-    ps --ppid "${badger_pid}" -o pid,cmd --no-headers \
-      | awk '$2 == "sleep" { printf("%s\n", $1) }'
+    echo "${badger_processes}" \
+      | awk 'index($0, "sleep 10") > 0 { printf("%s\n", $1) }'
   )"
+  test "${sleep_pid}" != "" || fail "unable to determine the sleep process PID\n\n${badger_processes}"
   kill -SIGTERM "${sleep_pid}"
   wait -n || true
 
