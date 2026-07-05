@@ -13,7 +13,7 @@ use signal_hook::iterator::Signals;
 /// The thread will keep an eye on `child_pid`, and only forward signals as long as it
 /// is non-zero.
 pub fn forward_to(child_pid: Arc<atomic::AtomicU32>) -> Result<()> {
-    const SIGNALS: [i32; 22] = [
+    const SIGNALS: &[i32] = &[
         SIGABRT, SIGALRM, SIGBUS, SIGCONT, SIGHUP, SIGINT, SIGPIPE, SIGPROF, SIGQUIT, SIGSYS,
         SIGTERM, SIGTRAP, SIGTSTP, SIGTTIN, SIGTTOU, SIGURG, SIGUSR1, SIGUSR2, SIGVTALRM, SIGWINCH,
         SIGXCPU, SIGXFSZ,
@@ -21,13 +21,21 @@ pub fn forward_to(child_pid: Arc<atomic::AtomicU32>) -> Result<()> {
     let mut signals = Signals::new(SIGNALS)?;
     std::thread::spawn(move || {
         for signal in signals.forever() {
-            let pid = &child_pid.load(atomic::Ordering::Relaxed);
-            if *pid == 0 {
+            let pid = child_pid.load(atomic::Ordering::Acquire);
+            if pid == 0 {
                 continue;
             }
-            let pid = Pid::from_raw(*pid as i32);
+            let pid = Pid::from_raw(pid as i32);
             let signal = nix_signal::Signal::try_from(signal).expect("invalid signal");
-            nix_signal::kill(pid, signal).expect("failed to send signal");
+            match nix_signal::kill(pid, signal) {
+                Ok(_) => {}
+                Err(nix::errno::Errno::ESRCH) => {
+                    // Child already died, just ignore.
+                }
+                Err(e) => {
+                    eprintln!("unable to forward signal: {}", e);
+                }
+            }
         }
     });
 

@@ -60,10 +60,10 @@ pub fn run(args: RunArgs) -> Result<()> {
         .spawn()?;
 
     // allow background signal thread to start forwarding signals
-    child_pid.store(child.id(), atomic::Ordering::Relaxed);
+    child_pid.store(child.id(), atomic::Ordering::Release);
     let result = child.wait()?;
     // disable signal forwarding since the child isn't running anymore
-    child_pid.store(0, atomic::Ordering::Relaxed);
+    child_pid.store(0, atomic::Ordering::Release);
 
     if result.success() {
         return Ok(());
