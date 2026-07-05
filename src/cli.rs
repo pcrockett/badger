@@ -44,7 +44,8 @@ pub struct PublishArgs {
 
 #[derive(Args)]
 pub struct RunArgs {
-    pub command: String,
+    #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+    pub command: Vec<String>,
 
     #[arg(short, long)]
     pub shell: Option<String>,

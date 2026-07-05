@@ -297,3 +297,25 @@ EOF
   assert_no_stdout
   assert_stderr "^foo$"
 }
+
+@test 'run - trailing args - interpreted as command' {
+  capture_output badger run echo foo bar
+  assert_no_stderr
+  assert_stdout "foo bar"
+  assert_exit_code 0
+
+  capture_output badger run -- echo foo bar
+  assert_no_stderr
+  assert_stdout "foo bar"
+  assert_exit_code 0
+
+  capture_output badger run echo foo bar --shell bash
+  assert_no_stderr
+  assert_stdout "foo bar"
+  assert_exit_code 0
+
+  capture_output badger run -- echo foo bar --shell bash
+  assert_no_stderr
+  assert_stdout "foo bar --shell bash"
+  assert_exit_code 0
+}

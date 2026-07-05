@@ -51,7 +51,7 @@ pub fn run(args: RunArgs) -> Result<()> {
     let child_pid = Arc::new(atomic::AtomicU32::new(0));
     signals::forward_to(child_pid.clone())?;
 
-    let command = args.command;
+    let command = args.command.join(" ");
     let mut child = Command::new(args.shell.unwrap_or("sh".to_owned()))
         .args(["-c", command.as_str()])
         .stdin(Stdio::inherit())
