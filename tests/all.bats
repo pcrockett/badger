@@ -218,6 +218,52 @@ EOF
 }$'
 }
 
+@test 'run - child process sigtermmed - publishes' {
+  badger run "sleep 10" &
+  badger_pid=$!
+  sleep 1
+  badger_processes="$(ps --ppid "${badger_pid}" -o pid,cmd --no-headers)"
+  sleep_pid="$(
+    echo "${badger_processes}" \
+      | awk 'index($0, "sleep 10") > 0 { printf("%s\n", $1) }'
+  )"
+  test "${sleep_pid}" != "" || fail "unable to determine the sleep process PID\n\n${badger_processes}"
+  kill -SIGTERM "${sleep_pid}"
+  wait -n || true
+
+  capture_output badger next --format json
+  # shellcheck disable=SC2016
+  assert_stdout '^\{
+  "message": "`sleep 10` was terminated with signal 15.",
+  "level": "error",
+  "data": \{
+    "command": "sleep 10",
+    "exit_code": null,
+    "signal": 15
+  }
+}$'
+}
+
+@test 'run - badger sigtermmed - publishes' {
+  badger run "sleep 10" &
+  badger_pid=$!
+  sleep 1
+  kill -SIGTERM "${badger_pid}"
+  wait -n || true
+
+  capture_output badger next --format json
+  # shellcheck disable=SC2016
+  assert_stdout '^\{
+  "message": "`sleep 10` was terminated with signal 15.",
+  "level": "error",
+  "data": \{
+    "command": "sleep 10",
+    "exit_code": null,
+    "signal": 15
+  }
+}$'
+}
+
 @test 'run - always - preserves stdin' {
   capture_output badger run cat < <(echo foo)
   assert_exit_code 0
@@ -252,4 +298,26 @@ EOF
   assert_exit_code 1
   assert_no_stdout
   assert_stderr "^foo$"
+}
+
+@test 'run - trailing args - interpreted as command' {
+  capture_output badger run echo foo bar
+  assert_no_stderr
+  assert_stdout "foo bar"
+  assert_exit_code 0
+
+  capture_output badger run -- echo foo bar
+  assert_no_stderr
+  assert_stdout "foo bar"
+  assert_exit_code 0
+
+  capture_output badger run echo foo bar --shell bash
+  assert_no_stderr
+  assert_stdout "foo bar"
+  assert_exit_code 0
+
+  capture_output badger run -- echo foo bar --shell bash
+  assert_no_stderr
+  assert_stdout "foo bar --shell bash"
+  assert_exit_code 0
 }

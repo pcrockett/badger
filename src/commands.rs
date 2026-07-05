@@ -5,9 +5,11 @@ use std::{
     os::unix::process::ExitStatusExt,
     path::PathBuf,
     process::{Command, Stdio, exit},
+    sync::{Arc, atomic},
 };
 
 use crate::cli::{NextArgs, PublishArgs, RunArgs};
+use crate::signals;
 use anyhow::{Result, bail};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
@@ -36,21 +38,33 @@ pub fn publish(args: PublishArgs) -> Result<()> {
     })?;
 
     if args.verbose {
-        println!("Saved to {}", path.to_str().unwrap());
+        println!("Saved to {}", path.to_str().expect("unable to unwrap path"));
     }
 
     Ok(())
 }
 
+/// Start a child process to run the given command, forwarding signals to it, and
+/// publishing an event if the process exits with a nonzero exit code or terminates
+/// by signal.
 pub fn run(args: RunArgs) -> Result<()> {
-    let command = args.command;
-    let mut child = Command::new(args.shell.unwrap_or("bash".to_owned()))
+    let child_pid = Arc::new(atomic::AtomicU32::new(0));
+    signals::forward_to(child_pid.clone())?;
+
+    let command = args.command.join(" ");
+    let mut child = Command::new(args.shell.unwrap_or("sh".to_owned()))
         .args(["-c", command.as_str()])
         .stdin(Stdio::inherit())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .spawn()?;
+
+    // allow background signal thread to start forwarding signals
+    child_pid.store(child.id(), atomic::Ordering::Release);
     let result = child.wait()?;
+    // disable signal forwarding since the child isn't running anymore
+    child_pid.store(0, atomic::Ordering::Release);
+
     if result.success() {
         return Ok(());
     }
@@ -58,7 +72,7 @@ pub fn run(args: RunArgs) -> Result<()> {
     let message = match result.code() {
         Some(code) => format!("`{command}` exited with code {code}."),
         None => {
-            let signal = result.signal().unwrap();
+            let signal = result.signal().expect("could not unwrap signal");
             format!("`{command}` was terminated with signal {signal}.")
         }
     };
@@ -80,7 +94,7 @@ pub fn run(args: RunArgs) -> Result<()> {
 pub fn next(args: NextArgs) -> Result<()> {
     let mut all_entries: Vec<PathBuf> = read_dir(badger_state_dir()?)?
         .filter(|x| x.is_ok())
-        .map(|x| x.unwrap().path())
+        .map(|x| x.expect("unable to unwrap dir entry").path())
         .filter(|x| x.is_file())
         .collect();
     all_entries.sort();
@@ -114,7 +128,7 @@ pub fn next(args: NextArgs) -> Result<()> {
 pub fn count() -> Result<()> {
     let count = read_dir(badger_state_dir()?)?
         .filter(|x| x.is_ok())
-        .map(|x| x.unwrap().path())
+        .map(|x| x.expect("unable to unwrap dir entry").path())
         .filter(|x| x.is_file())
         .count();
     println!("{}", count);
@@ -137,7 +151,7 @@ pub fn pending() -> Result<()> {
 
 fn badger_state_dir() -> Result<PathBuf> {
     let state_home = env::var("XDG_STATE_HOME").unwrap_or_else(|_| {
-        let home = env::var("HOME").unwrap();
+        let home = env::var("HOME").expect("no HOME env variable");
         format!("{}/.local/state", home)
     });
     let path = PathBuf::from(state_home).join("badger");
