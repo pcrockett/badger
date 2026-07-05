@@ -44,7 +44,7 @@ pub fn publish(args: PublishArgs) -> Result<()> {
 
 pub fn run(args: RunArgs) -> Result<()> {
     let command = args.command;
-    let mut child = Command::new(args.shell.unwrap_or("bash".to_owned()))
+    let mut child = Command::new(args.shell.unwrap_or("sh".to_owned()))
         .args(["-c", command.as_str()])
         .stdin(Stdio::inherit())
         .stdout(Stdio::inherit())
