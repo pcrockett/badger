@@ -5,9 +5,11 @@ use std::{
     os::unix::process::ExitStatusExt,
     path::PathBuf,
     process::{Command, Stdio, exit},
+    sync::{Arc, atomic},
 };
 
 use crate::cli::{NextArgs, PublishArgs, RunArgs};
+use crate::signals;
 use anyhow::{Result, bail};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
@@ -42,7 +44,13 @@ pub fn publish(args: PublishArgs) -> Result<()> {
     Ok(())
 }
 
+/// Start a child process to run the given command, forwarding signals to it, and
+/// publishing an event if the process exits with a nonzero exit code or terminates
+/// by signal.
 pub fn run(args: RunArgs) -> Result<()> {
+    let child_pid = Arc::new(atomic::AtomicU32::new(0));
+    signals::forward_to(child_pid.clone())?;
+
     let command = args.command;
     let mut child = Command::new(args.shell.unwrap_or("sh".to_owned()))
         .args(["-c", command.as_str()])
@@ -50,7 +58,13 @@ pub fn run(args: RunArgs) -> Result<()> {
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .spawn()?;
+
+    // allow background signal thread to start forwarding signals
+    child_pid.store(child.id(), atomic::Ordering::Relaxed);
     let result = child.wait()?;
+    // disable signal forwarding since the child isn't running anymore
+    child_pid.store(0, atomic::Ordering::Relaxed);
+
     if result.success() {
         return Ok(());
     }
