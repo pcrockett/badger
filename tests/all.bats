@@ -44,11 +44,46 @@ source tests/util.sh
   assert_exit_code 0
 }
 
-@test 'publish - verbose - returns file path' {
-  capture_output badger publish "hi" --verbose
-  assert_stdout "^Saved to ${XDG_STATE_HOME}/badger/.+_000\.json$"
+@test 'publish - flag after option separator - treated as message' {
+  capture_output badger publish -- --level
+  assert_no_stdout
   assert_no_stderr
   assert_exit_code 0
+
+  capture_output badger next
+  assert_stdout "^--level$"
+}
+
+@test 'publish - single hyphen long flag - treated as message' {
+  capture_output badger publish -level
+  assert_no_stdout
+  assert_no_stderr
+  assert_exit_code 0
+
+  capture_output badger next
+  assert_stdout "^-level$"
+
+  capture_output badger publish --level -level message
+  assert_no_stdout
+  assert_no_stderr
+  assert_exit_code 0
+
+  capture_output badger next --format json
+  assert_stdout '^\{
+  "message": "message",
+  "level": "-level",
+  "data": null
+}$'
+}
+
+@test 'publish - option separator twice - treated as message' {
+  capture_output badger publish -- --
+  assert_no_stdout
+  assert_no_stderr
+  assert_exit_code 0
+
+  capture_output badger next
+  assert_stdout "^--$"
 }
 
 @test 'publish - custom timestamp - uses timestamp' {
