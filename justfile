@@ -1,4 +1,4 @@
-default_target := "x86_64-unknown-linux-gnu"
+default_target := "x86_64-unknown-linux-musl"
 
 [private]
 _default:

@@ -9,7 +9,7 @@ env:
   CARGO_TERM_COLOR: always
   # Fail CI on all warnings
   RUSTFLAGS: "-Dwarnings"
-  TARGETS_TO_BUILD: x86_64-unknown-linux-gnu
+  TARGETS_TO_BUILD: x86_64-unknown-linux-musl
 
 jobs:
 
