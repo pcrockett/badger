@@ -31,15 +31,11 @@ pub fn publish(args: PublishArgs) -> Result<()> {
     };
 
     let data = data.map(into_json_value);
-    let path = save_notification(Notification {
+    save_notification(Notification {
         message: args.message,
         level: args.level.unwrap_or("info".to_owned()),
         data,
     })?;
-
-    if args.verbose {
-        println!("Saved to {}", path.to_str().expect("unable to unwrap path"));
-    }
 
     Ok(())
 }
@@ -84,7 +80,6 @@ pub fn run(args: RunArgs) -> Result<()> {
     publish(PublishArgs {
         message,
         level: Some("error".to_owned()),
-        verbose: false,
         data: Some(metadata.to_string()),
     })?;
 

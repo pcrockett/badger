@@ -30,13 +30,11 @@ pub enum CliCommand {
 
 #[derive(Args)]
 pub struct PublishArgs {
+    #[arg(allow_hyphen_values = true)]
     pub message: String,
 
     #[arg(short, long)]
     pub level: Option<String>,
-
-    #[arg(short, long)]
-    pub verbose: bool,
 
     #[arg(short, long)]
     pub data: Option<String>,
