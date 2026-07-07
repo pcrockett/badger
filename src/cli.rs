@@ -39,7 +39,7 @@ pub struct PublishArgs {
     pub level: String,
 
     #[arg(short, long)]
-    /// Additional notification metadata in JSON format
+    /// Attach metadata in JSON format (specify "-" for stdin)
     pub data: Option<String>,
 }
 
