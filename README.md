@@ -27,7 +27,7 @@ support for other platforms are welcome.
 
 ## starship
 
-Display a notification badge via [starship](https://starship.rs/):
+Display a notification badge in your terminal prompt via [starship](https://starship.rs/):
 
 ```toml
 [custom.badger]
