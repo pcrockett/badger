@@ -30,6 +30,8 @@ support for other platforms are welcome.
 Display a notification badge in your terminal prompt via [starship](https://starship.rs/):
 
 ```toml
+# ~/.config/starship/starship.toml
+
 [custom.badger]
 when = 'badger pending'
 symbol = '󱅫'             # nerd font: <https://www.nerdfonts.com/>
