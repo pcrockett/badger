@@ -8,7 +8,7 @@ use std::{
     sync::{Arc, atomic},
 };
 
-use crate::cli::{NextArgs, PublishArgs, RunArgs};
+use crate::cli::{NextArgs, OutputFormat, PublishArgs, RunArgs};
 use crate::signals;
 use anyhow::{Result, bail};
 use chrono::Utc;
@@ -33,7 +33,7 @@ pub fn publish(args: PublishArgs) -> Result<()> {
     let data = data.map(into_json_value);
     save_notification(Notification {
         message: args.message,
-        level: args.level.unwrap_or("info".to_owned()),
+        level: args.level,
         data,
     })?;
 
@@ -48,7 +48,7 @@ pub fn run(args: RunArgs) -> Result<()> {
     signals::forward_to(child_pid.clone())?;
 
     let command = args.command.join(" ");
-    let mut child = Command::new(args.shell.unwrap_or("sh".to_owned()))
+    let mut child = Command::new(args.shell)
         .args(["-c", command.as_str()])
         .stdin(Stdio::inherit())
         .stdout(Stdio::inherit())
@@ -79,7 +79,7 @@ pub fn run(args: RunArgs) -> Result<()> {
     });
     publish(PublishArgs {
         message,
-        level: Some("error".to_owned()),
+        level: "error".to_owned(),
         data: Some(metadata.to_string()),
     })?;
 
@@ -104,14 +104,10 @@ pub fn next(args: NextArgs) -> Result<()> {
     }
     let parsed: Notification = serde_json::from_str(data.as_str())?;
 
-    let format = args.format.unwrap_or("quiet".to_owned());
-    match format.as_str() {
-        "quiet" => println!("{}", parsed.message),
-        "json" => println!("{}", data),
-        _ => bail!(
-            "Unrecognized format: `{}`. Expected `quiet` or `json`.",
-            format
-        ),
+    let format = args.format;
+    match format {
+        OutputFormat::Quiet => println!("{}", parsed.message),
+        OutputFormat::Json => println!("{}", data),
     }
 
     if !args.peek {
