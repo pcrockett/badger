@@ -1,20 +1,33 @@
 # badger
 
-dead simple notifications without a daemon, in your terminal
+Dead simple notifications without a daemon, in your terminal.
 
-simply manipulates files in `~/.local/state/badger`:
+Output of `badger help`:
 
-- `badger publish` adds a file to the directory with contents you specify
-- `badger run` run a command and publish a notification if it fails
-- `badger next` displays the oldest file in the directory and deletes it
-- `badger pending` makes it easy to use in terminal prompt functions
+```
+Publish and view notifications in your terminal
 
-currently only the `x86_64-unknown-linux-musl` platform triple is supported. PRs adding
+Usage: badger <COMMAND>
+
+Commands:
+  publish  Publish a notification
+  run      Run a command and publish a notification if it fails
+  next     Display the next notification in the list
+  count    Get notification count
+  pending  Determine by exit code if notifications are pending
+  help     Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
+```
+
+Currently only the `x86_64-unknown-linux-musl` platform triple is supported. PRs adding
 support for other platforms are welcome.
 
 ## starship
 
-display a notification badge via [starship](https://starship.rs/):
+Display a notification badge via [starship](https://starship.rs/):
 
 ```toml
 [custom.badger]
@@ -25,10 +38,19 @@ format = '[ $symbol ]($style) '
 shell = ['sh']
 ```
 
-_on my old laptop from 2008 this adds about 4ms to the prompt time._
+_On my old laptop from 2008 this adds about 4ms to the prompt time._
 
 ## install
 
-1. download the executable from [releases](https://github.com/pcrockett/badger/releases)
+1. Download the executable from [releases](https://github.com/pcrockett/badger/releases)
 2. `mv badger-x86_64-unknown-linux-musl badger && chmod +x badger`
-3. put the executable somewhere in your `$PATH`
+3. Put the executable somewhere in your `$PATH`
+
+## how it works
+
+Badger publishes notifications simply by placing JSON files in `~/.local/state/badger`
+(by default). Reading and removing a notification is as simple as reading the oldest
+file in that folder, then deleting it.
+
+Dependency-free, no D-Bus required. Works well on headless machines, works fine via SSH.
+Simple. Naive. Good enough.
