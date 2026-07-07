@@ -1,5 +1,5 @@
 pub use clap::Parser;
-use clap::{Args, Subcommand};
+use clap::{Args, Subcommand, ValueEnum};
 
 #[derive(Parser)]
 #[command(version, long_about = None)]
@@ -31,29 +31,41 @@ pub enum CliCommand {
 #[derive(Args)]
 pub struct PublishArgs {
     #[arg(allow_hyphen_values = true)]
+    /// Notification content
     pub message: String,
 
-    #[arg(short, long)]
-    pub level: Option<String>,
+    #[arg(short, long, default_value = "info")]
+    /// Notification level (can be anything)
+    pub level: String,
 
     #[arg(short, long)]
+    /// Additional notification metadata in JSON format
     pub data: Option<String>,
 }
 
 #[derive(Args)]
 pub struct RunArgs {
     #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+    /// Command to run
     pub command: Vec<String>,
 
-    #[arg(short, long)]
-    pub shell: Option<String>,
+    #[arg(short, long, default_value = "sh")]
+    /// Shell to use when running the command
+    pub shell: String,
 }
 
 #[derive(Args)]
 pub struct NextArgs {
     #[arg(short, long)]
+    /// Just view notification contents; don't consume it
     pub peek: bool,
 
-    #[arg(short, long)]
-    pub format: Option<String>,
+    #[arg(short, long, value_enum, default_value_t = OutputFormat::Quiet)]
+    pub format: OutputFormat,
+}
+
+#[derive(Clone, Debug, ValueEnum)]
+pub enum OutputFormat {
+    Json,
+    Quiet,
 }
