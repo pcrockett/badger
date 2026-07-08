@@ -83,7 +83,15 @@ pub fn run(args: RunArgs) -> Result<()> {
         data: Some(metadata.to_string()),
     })?;
 
-    exit(result.code().unwrap_or(1));
+    exit(
+        // WIP: when a process dies because of a signal, it doesn't have an exit code
+        // (from the kernel's perspective). standard shell convention is to report an
+        // exit code of 128 + signal. i think we should do the same. code quality here
+        // is gross, but it works. i'd like to refactor when i get the time.
+        result
+            .code()
+            .unwrap_or_else(|| result.signal().unwrap() + 128),
+    );
 }
 
 pub fn next(args: NextArgs) -> Result<()> {
