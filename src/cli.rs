@@ -45,11 +45,11 @@ pub struct PublishArgs {
 
 #[derive(Args)]
 pub struct RunArgs {
-    #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+    #[arg(trailing_var_arg = true, allow_hyphen_values = true, required = true)]
     /// Command to run
     pub command: Vec<String>,
 
-    #[arg(short, long, default_value = "sh")]
+    #[arg(short, long, default_value = "none")]
     /// Shell to use when running the command
     pub shell: String,
 }

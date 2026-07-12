@@ -47,9 +47,18 @@ pub fn run(args: RunArgs) -> Result<i32> {
     let child_pid = Arc::new(atomic::AtomicU32::new(0));
     signals::forward_to(child_pid.clone())?;
 
-    let command = args.command.join(" ");
-    let mut child = Command::new(args.shell)
-        .args(["-c", command.as_str()])
+    let (command, args) = match args.shell.as_str() {
+        "none" => match args.command.as_slice() {
+            [] => panic!("no command specified"), // should be impossible if Cli implemented correctly
+            [first, rest @ ..] => (first.clone(), rest.to_vec()),
+        },
+        shell => (
+            shell.to_owned(),
+            vec!["-c".to_owned(), args.command.join(" ")],
+        ),
+    };
+    let mut child = Command::new(command.clone())
+        .args(args.clone())
         .stdin(Stdio::inherit())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
@@ -65,15 +74,20 @@ pub fn run(args: RunArgs) -> Result<i32> {
         return Ok(0);
     }
 
+    let mut rendered_command = vec![command.clone()];
+    rendered_command.append(&mut args.clone());
+    let rendered_command = rendered_command.join(" ");
+
     match result.code() {
         Some(code) => {
             let metadata = serde_json::json!({
                 "command": command,
+                "args": args,
                 "exit_code": code,
                 "signal": null,
             });
             publish(PublishArgs {
-                message: format!("`{command}` exited with code {code}."),
+                message: format!("`{rendered_command}` exited with code {code}."),
                 level: "error".to_owned(),
                 data: Some(metadata.to_string()),
             })?;
@@ -85,11 +99,12 @@ pub fn run(args: RunArgs) -> Result<i32> {
             let signal = result.signal().expect("could not unwrap signal");
             let metadata = serde_json::json!({
                 "command": command,
+                "args": args,
                 "exit_code": null,
                 "signal": signal,
             });
             publish(PublishArgs {
-                message: format!("`{command}` was terminated with signal {signal}."),
+                message: format!("`{rendered_command}` was terminated with signal {signal}."),
                 level: "error".to_owned(),
                 data: Some(metadata.to_string()),
             })?;
