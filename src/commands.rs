@@ -4,7 +4,7 @@ use std::{
     io::{ErrorKind, Read, Write},
     os::unix::process::ExitStatusExt,
     path::PathBuf,
-    process::{Command, Stdio, exit},
+    process::{Command, Stdio},
     sync::{Arc, atomic},
 };
 
@@ -21,7 +21,7 @@ struct Notification {
     data: Option<serde_json::Value>,
 }
 
-pub fn publish(args: PublishArgs) -> Result<()> {
+pub fn publish(args: PublishArgs) -> Result<i32> {
     let data = if args.data == Some("-".to_owned()) {
         let mut buf = String::new();
         std::io::stdin().read_to_string(&mut buf)?;
@@ -37,13 +37,13 @@ pub fn publish(args: PublishArgs) -> Result<()> {
         data,
     })?;
 
-    Ok(())
+    Ok(0)
 }
 
 /// Start a child process to run the given command, forwarding signals to it, and
 /// publishing an event if the process exits with a nonzero exit code or terminates
 /// by signal.
-pub fn run(args: RunArgs) -> Result<()> {
+pub fn run(args: RunArgs) -> Result<i32> {
     let child_pid = Arc::new(atomic::AtomicU32::new(0));
     signals::forward_to(child_pid.clone())?;
 
@@ -62,31 +62,45 @@ pub fn run(args: RunArgs) -> Result<()> {
     child_pid.store(0, atomic::Ordering::Release);
 
     if result.success() {
-        return Ok(());
+        return Ok(0);
     }
 
-    let message = match result.code() {
-        Some(code) => format!("`{command}` exited with code {code}."),
-        None => {
-            let signal = result.signal().expect("could not unwrap signal");
-            format!("`{command}` was terminated with signal {signal}.")
+    match result.code() {
+        Some(code) => {
+            let metadata = serde_json::json!({
+                "command": command,
+                "exit_code": code,
+                "signal": null,
+            });
+            publish(PublishArgs {
+                message: format!("`{command}` exited with code {code}."),
+                level: "error".to_owned(),
+                data: Some(metadata.to_string()),
+            })?;
+            Ok(code)
         }
-    };
-    let metadata = serde_json::json!({
-        "command": command,
-        "exit_code": result.code(),
-        "signal": result.signal(),
-    });
-    publish(PublishArgs {
-        message,
-        level: "error".to_owned(),
-        data: Some(metadata.to_string()),
-    })?;
+        None => {
+            // when a process dies because of a signal, it doesn't have an exit code
+            // (from the kernel's perspective).
+            let signal = result.signal().expect("could not unwrap signal");
+            let metadata = serde_json::json!({
+                "command": command,
+                "exit_code": null,
+                "signal": signal,
+            });
+            publish(PublishArgs {
+                message: format!("`{command}` was terminated with signal {signal}."),
+                level: "error".to_owned(),
+                data: Some(metadata.to_string()),
+            })?;
 
-    exit(result.code().unwrap_or(1));
+            // standard shell convention is to report an exit code of 128 + signal.
+            Ok(128 + signal)
+        }
+    }
 }
 
-pub fn next(args: NextArgs) -> Result<()> {
+pub fn next(args: NextArgs) -> Result<i32> {
     let mut all_entries: Vec<PathBuf> = read_dir(badger_state_dir()?)?
         .filter(|x| x.is_ok())
         .map(|x| x.expect("unable to unwrap dir entry").path())
@@ -94,7 +108,7 @@ pub fn next(args: NextArgs) -> Result<()> {
         .collect();
     all_entries.sort();
     let Some(next_file) = all_entries.first() else {
-        return Ok(());
+        return Ok(0);
     };
 
     let mut data = String::new();
@@ -113,20 +127,20 @@ pub fn next(args: NextArgs) -> Result<()> {
     if !args.peek {
         std::fs::remove_file(next_file)?;
     }
-    Ok(())
+    Ok(0)
 }
 
-pub fn count() -> Result<()> {
+pub fn count() -> Result<i32> {
     let count = read_dir(badger_state_dir()?)?
         .filter(|x| x.is_ok())
         .map(|x| x.expect("unable to unwrap dir entry").path())
         .filter(|x| x.is_file())
         .count();
     println!("{}", count);
-    Ok(())
+    Ok(0)
 }
 
-pub fn pending() -> Result<()> {
+pub fn pending() -> Result<i32> {
     let result: Vec<()> = read_dir(badger_state_dir()?)?
         .filter(|x| x.is_ok())
         .map(|_| ())
@@ -134,9 +148,9 @@ pub fn pending() -> Result<()> {
         .collect();
 
     if Some(&()) == result.first() {
-        Ok(())
+        Ok(0)
     } else {
-        exit(1);
+        Ok(1)
     }
 }
 

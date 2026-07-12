@@ -264,7 +264,11 @@ EOF
   )"
   test "${sleep_pid}" != "" || fail "unable to determine the sleep process PID\n\n${badger_processes}"
   kill -SIGTERM "${sleep_pid}"
-  wait -n || true
+
+  # ensure badger exited with status 128 + 15 (SIGTERM is signal 15)
+  wait -n && fail "badger exited with code $?"
+  badger_exit=$?
+  test "${badger_exit}" = 143 || fail "badger exited with code ${badger_exit}"
 
   capture_output badger next --format json
   # shellcheck disable=SC2016
@@ -284,7 +288,11 @@ EOF
   badger_pid=$!
   sleep 1
   kill -SIGTERM "${badger_pid}"
-  wait -n || true
+
+  # ensure badger exited with status 128 + 15 (SIGTERM is signal 15)
+  wait -n && fail "badger exited with code $?"
+  badger_exit=$?
+  test "${badger_exit}" = 143 || fail "badger exited with code ${badger_exit}"
 
   capture_output badger next --format json
   # shellcheck disable=SC2016
