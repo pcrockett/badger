@@ -225,6 +225,13 @@ EOF
   assert_stdout '^badger [[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$'
 }
 
+@test 'run - no command specified - error' {
+  capture_output badger run
+  assert_stderr 'required arguments were not provided'
+  assert_no_stdout
+  assert_exit_code 2
+}
+
 @test 'run - zero exit - does not publish' {
   capture_output badger run true
   assert_exit_code 0

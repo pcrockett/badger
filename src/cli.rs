@@ -45,7 +45,7 @@ pub struct PublishArgs {
 
 #[derive(Args)]
 pub struct RunArgs {
-    #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+    #[arg(trailing_var_arg = true, allow_hyphen_values = true, required = true)]
     /// Command to run
     pub command: Vec<String>,
 
