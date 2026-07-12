@@ -234,6 +234,30 @@ EOF
 }
 
 @test 'run - nonzero exit - publishes' {
+  capture_output badger run --shell sh false
+  assert_exit_code 1
+  assert_no_stderr
+  assert_no_stdout
+
+  capture_output badger next --format json
+
+  # shellcheck disable=SC2016
+  assert_stdout '^\{
+  "message": "`sh -c false` exited with code 1.",
+  "level": "error",
+  "data": \{
+    "args": \[
+      "-c",
+      "false"
+    ],
+    "command": "sh",
+    "exit_code": 1,
+    "signal": null
+  }
+}$'
+}
+
+@test 'run - no shell, nonzero exit - publishes' {
   capture_output badger run false
   assert_exit_code 1
   assert_no_stderr
@@ -246,6 +270,7 @@ EOF
   "message": "`false` exited with code 1.",
   "level": "error",
   "data": \{
+    "args": \[],
     "command": "false",
     "exit_code": 1,
     "signal": null
@@ -254,7 +279,41 @@ EOF
 }
 
 @test 'run - child process sigtermmed - publishes' {
-  badger run "sleep 10" &
+  badger run --shell sh sleep 10 &
+  badger_pid=$!
+  sleep 1
+  badger_processes="$(ps --ppid "${badger_pid}" -o pid,cmd --no-headers)"
+  sleep_pid="$(
+    echo "${badger_processes}" \
+      | awk 'index($0, "sleep 10") > 0 { printf("%s\n", $1) }'
+  )"
+  test "${sleep_pid}" != "" || fail "unable to determine the sleep process PID\n\n${badger_processes}"
+  kill -SIGTERM "${sleep_pid}"
+
+  # ensure badger exited with status 128 + 15 (SIGTERM is signal 15)
+  wait -n && fail "badger exited with code $?"
+  badger_exit=$?
+  test "${badger_exit}" = 143 || fail "badger exited with code ${badger_exit}"
+
+  capture_output badger next --format json
+  # shellcheck disable=SC2016
+  assert_stdout '^\{
+  "message": "`sh -c sleep 10` was terminated with signal 15.",
+  "level": "error",
+  "data": \{
+    "args": \[
+      "-c",
+      "sleep 10"
+    ],
+    "command": "sh",
+    "exit_code": null,
+    "signal": 15
+  }
+}$'
+}
+
+@test 'run - no shell, child process sigtermmed - publishes' {
+  badger run sleep 10 &
   badger_pid=$!
   sleep 1
   badger_processes="$(ps --ppid "${badger_pid}" -o pid,cmd --no-headers)"
@@ -276,7 +335,10 @@ EOF
   "message": "`sleep 10` was terminated with signal 15.",
   "level": "error",
   "data": \{
-    "command": "sleep 10",
+    "args": \[
+      "10"
+    ],
+    "command": "sleep",
     "exit_code": null,
     "signal": 15
   }
@@ -284,7 +346,7 @@ EOF
 }
 
 @test 'run - badger sigtermmed - publishes' {
-  badger run "sleep 10" &
+  badger run --shell sh "sleep 10" &
   badger_pid=$!
   sleep 1
   kill -SIGTERM "${badger_pid}"
@@ -297,10 +359,14 @@ EOF
   capture_output badger next --format json
   # shellcheck disable=SC2016
   assert_stdout '^\{
-  "message": "`sleep 10` was terminated with signal 15.",
+  "message": "`sh -c sleep 10` was terminated with signal 15.",
   "level": "error",
   "data": \{
-    "command": "sleep 10",
+    "args": \[
+      "-c",
+      "sleep 10"
+    ],
+    "command": "sh",
     "exit_code": null,
     "signal": 15
   }
@@ -308,36 +374,36 @@ EOF
 }
 
 @test 'run - always - preserves stdin' {
-  capture_output badger run cat < <(echo foo)
+  capture_output badger run --shell sh cat < <(echo foo)
   assert_exit_code 0
   assert_no_stderr
   assert_stdout "^foo$"
 
-  capture_output badger run "cat; exit 1" < <(echo foo)
+  capture_output badger run --shell sh "cat; exit 1" < <(echo foo)
   assert_exit_code 1
   assert_no_stderr
   assert_stdout "^foo$"
 }
 
 @test 'run - always - preserves stdout' {
-  capture_output badger run "echo foo"
+  capture_output badger run --shell sh "echo foo"
   assert_exit_code 0
   assert_no_stderr
   assert_stdout "^foo$"
 
-  capture_output badger run "echo foo; exit 1"
+  capture_output badger run --shell sh "echo foo; exit 1"
   assert_exit_code 1
   assert_no_stderr
   assert_stdout "^foo$"
 }
 
 @test 'run - always - preserves stderr' {
-  capture_output badger run "echo foo >&2"
+  capture_output badger run --shell sh "echo foo >&2"
   assert_exit_code 0
   assert_no_stdout
   assert_stderr "^foo$"
 
-  capture_output badger run "echo foo >&2; exit 1"
+  capture_output badger run --shell sh "echo foo >&2; exit 1"
   assert_exit_code 1
   assert_no_stdout
   assert_stderr "^foo$"

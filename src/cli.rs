@@ -49,7 +49,7 @@ pub struct RunArgs {
     /// Command to run
     pub command: Vec<String>,
 
-    #[arg(short, long, default_value = "sh")]
+    #[arg(short, long, default_value = "none")]
     /// Shell to use when running the command
     pub shell: String,
 }
