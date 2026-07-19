@@ -1,0 +1,4 @@
+# shellcheck shell=bash
+strict_env
+
+eval "$(mise activate bash)"
