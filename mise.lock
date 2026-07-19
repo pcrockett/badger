@@ -46,6 +46,115 @@ url = "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_
 url_api = "https://api.github.com/repos/rhysd/actionlint/releases/assets/384924919"
 provenance = "github-attestations"
 
+[[tools.bats]]
+version = "1.13.0"
+backend = "aqua:bats-core/bats-core"
+
+[tools.bats."platforms.linux-arm64"]
+url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.13.0.tar.gz"
+url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/v1.13.0"
+
+[tools.bats."platforms.linux-arm64-musl"]
+url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.13.0.tar.gz"
+url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/v1.13.0"
+
+[tools.bats."platforms.linux-x64"]
+url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.13.0.tar.gz"
+url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/v1.13.0"
+
+[tools.bats."platforms.linux-x64-musl"]
+url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.13.0.tar.gz"
+url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/v1.13.0"
+
+[tools.bats."platforms.macos-arm64"]
+url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.13.0.tar.gz"
+url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/v1.13.0"
+
+[tools.bats."platforms.macos-x64"]
+url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.13.0.tar.gz"
+url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/v1.13.0"
+
+[[tools.just]]
+version = "1.56.0"
+backend = "aqua:casey/just"
+
+[tools.just."platforms.linux-arm64"]
+checksum = "sha256:c8c1d656e9f47569ec1ae2bf8779af2621cdeea6bbbba3b0cacd64f951d25e2b"
+url = "https://github.com/casey/just/releases/download/1.56.0/just-1.56.0-aarch64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/casey/just/releases/assets/472074960"
+
+[tools.just."platforms.linux-arm64-musl"]
+checksum = "sha256:c8c1d656e9f47569ec1ae2bf8779af2621cdeea6bbbba3b0cacd64f951d25e2b"
+url = "https://github.com/casey/just/releases/download/1.56.0/just-1.56.0-aarch64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/casey/just/releases/assets/472074960"
+
+[tools.just."platforms.linux-x64"]
+checksum = "sha256:fa2a8ec1015d9df5330941ade12437488fc40d33f9c9f8cd4eb70a26de11b639"
+url = "https://github.com/casey/just/releases/download/1.56.0/just-1.56.0-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/casey/just/releases/assets/472074624"
+
+[tools.just."platforms.linux-x64-musl"]
+checksum = "sha256:fa2a8ec1015d9df5330941ade12437488fc40d33f9c9f8cd4eb70a26de11b639"
+url = "https://github.com/casey/just/releases/download/1.56.0/just-1.56.0-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/casey/just/releases/assets/472074624"
+
+[tools.just."platforms.macos-arm64"]
+checksum = "sha256:f35798d4bcdc4db020eef7d2853ad98bbfb97a4d29ee695ba042f18e7fedcc11"
+url = "https://github.com/casey/just/releases/download/1.56.0/just-1.56.0-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/casey/just/releases/assets/472074635"
+
+[tools.just."platforms.macos-x64"]
+checksum = "sha256:09b35ff6d17023ffae37ce408d1a78a976d9e001cae54b88e238f7f40db9b783"
+url = "https://github.com/casey/just/releases/download/1.56.0/just-1.56.0-x86_64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/casey/just/releases/assets/472074650"
+
+[tools.just."platforms.windows-x64"]
+checksum = "sha256:804f5b2fe94291d0df38fd8dfc5620afbf3496f8f11c1915b42a87323234f0ba"
+url = "https://github.com/casey/just/releases/download/1.56.0/just-1.56.0-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/casey/just/releases/assets/472075917"
+
+[[tools.pre-commit]]
+version = "4.6.0"
+backend = "aqua:pre-commit/pre-commit"
+
+[tools.pre-commit."platforms.linux-arm64"]
+checksum = "sha256:ea8a0c84902e48c1875558f2f362ed8476773aa5fc8c16c5d8f2acc2a2830a65"
+url = "https://github.com/pre-commit/pre-commit/releases/download/v4.6.0/pre-commit-4.6.0.pyz"
+url_api = "https://api.github.com/repos/pre-commit/pre-commit/releases/assets/401888770"
+
+[tools.pre-commit."platforms.linux-arm64-musl"]
+checksum = "sha256:ea8a0c84902e48c1875558f2f362ed8476773aa5fc8c16c5d8f2acc2a2830a65"
+url = "https://github.com/pre-commit/pre-commit/releases/download/v4.6.0/pre-commit-4.6.0.pyz"
+url_api = "https://api.github.com/repos/pre-commit/pre-commit/releases/assets/401888770"
+
+[tools.pre-commit."platforms.linux-x64"]
+checksum = "sha256:ea8a0c84902e48c1875558f2f362ed8476773aa5fc8c16c5d8f2acc2a2830a65"
+url = "https://github.com/pre-commit/pre-commit/releases/download/v4.6.0/pre-commit-4.6.0.pyz"
+url_api = "https://api.github.com/repos/pre-commit/pre-commit/releases/assets/401888770"
+
+[tools.pre-commit."platforms.linux-x64-musl"]
+checksum = "sha256:ea8a0c84902e48c1875558f2f362ed8476773aa5fc8c16c5d8f2acc2a2830a65"
+url = "https://github.com/pre-commit/pre-commit/releases/download/v4.6.0/pre-commit-4.6.0.pyz"
+url_api = "https://api.github.com/repos/pre-commit/pre-commit/releases/assets/401888770"
+
+[tools.pre-commit."platforms.macos-arm64"]
+checksum = "sha256:ea8a0c84902e48c1875558f2f362ed8476773aa5fc8c16c5d8f2acc2a2830a65"
+url = "https://github.com/pre-commit/pre-commit/releases/download/v4.6.0/pre-commit-4.6.0.pyz"
+url_api = "https://api.github.com/repos/pre-commit/pre-commit/releases/assets/401888770"
+
+[tools.pre-commit."platforms.macos-x64"]
+checksum = "sha256:ea8a0c84902e48c1875558f2f362ed8476773aa5fc8c16c5d8f2acc2a2830a65"
+url = "https://github.com/pre-commit/pre-commit/releases/download/v4.6.0/pre-commit-4.6.0.pyz"
+url_api = "https://api.github.com/repos/pre-commit/pre-commit/releases/assets/401888770"
+
+[[tools.rust]]
+version = "1.97.1"
+backend = "core:rust"
+
+[tools.rust.options]
+profile = "default"
+targets = "x86_64-unknown-linux-musl"
+
 [[tools.shellcheck]]
 version = "0.11.0"
 backend = "aqua:koalaman/shellcheck"
