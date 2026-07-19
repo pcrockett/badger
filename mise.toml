@@ -5,8 +5,8 @@ just = "latest"
 pre-commit = "latest"
 rust = {
   version = "latest",
-  profile = "default",
-  targets = ["x86_64-unknown-linux-musl"]
+  targets = ["x86_64-unknown-linux-musl"],
+  components = ["clippy", "rustfmt"]
 }
 shellcheck = "latest"
 shfmt = "latest"
