@@ -155,6 +155,14 @@ backend = "core:rust"
 profile = "default"
 targets = "x86_64-unknown-linux-musl"
 
+[[tools.rust]]
+version = "1.97.1"
+backend = "core:rust"
+
+[tools.rust.options]
+components = "clippy,rustfmt"
+targets = "x86_64-unknown-linux-musl"
+
 [[tools.shellcheck]]
 version = "0.11.0"
 backend = "aqua:koalaman/shellcheck"
