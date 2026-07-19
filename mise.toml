@@ -1,0 +1,6 @@
+[tools]
+actionlint = "latest"
+shellcheck = "latest"
+shfmt = "latest"
+yamlfmt = "latest"
+yamllint = "latest"
