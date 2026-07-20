@@ -12,41 +12,43 @@ repos:
       - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
+
+  # local tools assumed to be installed with mise, see mise.toml
   - repo: local
     hooks:
+      - id: actionlint
+        name: lint github actions files
+        language: system
+        entry: actionlint
+        types:
+          - yaml
+        files: ^\.github/workflows/
       - id: shellcheck
-        name: shellcheck
+        name: lint shell scripts
         entry: shellcheck
         language: system
         types:
           - shell
       - id: shfmt
-        name: shfmt
+        name: autoformat shell scripts
         entry: shfmt
         args:
           - --write
         language: system
         types:
           - shell
-      - id: yamlfmt
-        name: yamlfmt
-        entry: yamlfmt
-        language: system
-        types:
-          - yaml
       - id: yamllint
-        name: yamllint
+        name: lint yaml files
         entry: yamllint
         language: system
         types:
           - yaml
-      - id: actionlint
-        name: actionlint
+      - id: yamlfmt
+        name: autoformat yaml files
+        entry: yamlfmt
         language: system
-        entry: actionlint
         types:
           - yaml
-        files: ^\.github/workflows/
       - id: clippy
         name: clippy
         entry: cargo clippy --fix --allow-dirty
