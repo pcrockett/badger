@@ -23,9 +23,14 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
       - uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea  # v4.2.1
+
+      # mise installs pre-commit for us above, but it doesn't setup the necessary
+      # caching for the pre-commit execution environment
+      - uses: pcrockett/setup-pre-commit@19ef06ee4c041b82a9ad48337154bd4429158560  # v0.1.0
+
       - run: just lint
       - run: just test
