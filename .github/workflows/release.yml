@@ -24,9 +24,10 @@ jobs:
         with:
           persist-credentials: false
 
-      # we rely on mise to get the correct version of pre-commit. this action is mainly
-      # useful because it caches the pre-commit execution environment for us.
-      - uses: pcrockett/setup-pre-commit@19ef06ee4c041b82a9ad48337154bd4429158560  # v0.1.0
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-hooks|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
 
       - uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea  # v4.2.1
       - run: just lint
