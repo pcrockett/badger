@@ -1,0 +1,14 @@
+[tools]
+actionlint = "latest"
+bats = "latest"
+just = "latest"
+pre-commit = "latest"
+rust = {
+  version = "latest",
+  targets = ["x86_64-unknown-linux-musl"],
+  components = ["clippy", "rustfmt"]
+}
+shellcheck = "latest"
+shfmt = "latest"
+yamlfmt = "latest"
+yamllint = "latest"
