@@ -32,6 +32,6 @@ jobs:
           path: ~/.cache/pre-commit
           key: pre-commit-hooks|${{ hashFiles('.pre-commit-config.yaml', 'mise.toml') }}
 
-      - uses: jdx/mise-action@8418fedb1110381a0d3ba51a7a415d7c1b884550  # v5.2.2
+      - uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d  # v5.2.4
       - run: just lint
       - run: just test
