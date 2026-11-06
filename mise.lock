@@ -107,6 +107,23 @@ checksum_source = "mise-versions"
 url = "https://github.com/mvdan/sh/releases/download/v3.12.0/shfmt_v3.12.0_linux_amd64"
 url_api = "https://api.github.com/repos/mvdan/sh/releases/assets/270490140"
 
+[[tools.uv]]
+version = "0.13.6"
+backend = "aqua:astral-sh/uv"
+specifiers = ["latest"]
+
+[tools.uv."platforms.linux-x64"]
+checksum = "sha256:f29c3e94ffabd7e6f3ba521dba169a9b7ec12100bf3257087f0f24f6123f3645"
+url = "https://github.com/astral-sh/uv/releases/download/0.13.6/uv-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/679980644"
+provenance = "github-attestations"
+
+[tools.uv."platforms.linux-x64-musl"]
+checksum = "sha256:5d61f26b6c7213779eda90edc6971ea6b0b796bfb8d49a574c8ad69b59838548"
+url = "https://github.com/astral-sh/uv/releases/download/0.13.6/uv-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/679980664"
+provenance = "github-attestations"
+
 [[tools.yamlfmt]]
 version = "0.17.2"
 backend = "aqua:google/yamlfmt"

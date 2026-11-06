@@ -10,6 +10,7 @@ rust = {
 }
 shellcheck = "latest"
 shfmt = "latest"
+uv = "latest"
 yamlfmt = "latest"
 yamllint = "latest"
 
