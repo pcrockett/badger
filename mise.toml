@@ -12,3 +12,6 @@ shellcheck = "latest"
 shfmt = "latest"
 yamlfmt = "latest"
 yamllint = "latest"
+
+[settings]
+lockfile_platforms = ["linux-x64", "linux-x64-musl"]
